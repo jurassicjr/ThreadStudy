@@ -8,9 +8,11 @@ import java.util.Scanner;
 public class TasksDistribution implements Runnable{
 
 	private Socket socket;
+	private TasksServer server;
 
-	public TasksDistribution(Socket socket) {
+	public TasksDistribution(Socket socket, TasksServer server) {
 		this.socket = socket;
+		this.server = server;
 		
 	}
 
@@ -35,6 +37,11 @@ public class TasksDistribution implements Runnable{
 				}
 				case "c2": {
 					output.println("Confirmação comando C2");
+					break;
+				}
+				case "shutdown": {
+					output.println("Desligando o servidor!");
+					server.shutdown();
 					break;
 				}
 				default:
