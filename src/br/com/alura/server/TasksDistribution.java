@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -12,9 +13,11 @@ public class TasksDistribution implements Runnable{
 	private Socket socket;
 	private TasksServer server;
 	private ExecutorService threadPool;
+	private BlockingQueue<String> commandQueue;
 
-	public TasksDistribution(ExecutorService threadPool, Socket socket, TasksServer server) {
+	public TasksDistribution(ExecutorService threadPool, BlockingQueue<String> commandQueue, Socket socket, TasksServer server) {
 		this.threadPool = threadPool;
+		this.commandQueue = commandQueue;
 		this.socket = socket;
 		this.server = server;
 	}
@@ -49,6 +52,11 @@ public class TasksDistribution implements Runnable{
 					this.threadPool.execute(new JoinTasksFutureResults(futureDB, futureWS, output));
 					break;
 				}
+				case "c3": {
+					this.commandQueue.put("c3");
+					output.println("Comando c3 adicionado na fila");
+					break;
+				}
 				case "shutdown": {
 					output.println("Desligando o servidor!");
 					server.shutdown();
@@ -63,7 +71,7 @@ public class TasksDistribution implements Runnable{
 			
 			output.close();
 			clientInput.close();
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		
