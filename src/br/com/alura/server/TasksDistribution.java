@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 public class TasksDistribution implements Runnable{
 
@@ -40,8 +41,12 @@ public class TasksDistribution implements Runnable{
 				}
 				case "c2": {
 					output.println("Confirmação comando C2");
-					CommandC2 c2 = new CommandC2(output);
-					threadPool.execute(c2);
+					CommandCallWS callWebService = new CommandCallWS(output);
+					CommandAccessDatabase accessDatabase = new CommandAccessDatabase(output);
+					Future<String> futureDB = threadPool.submit(accessDatabase);
+					Future<String> futureWS = threadPool.submit(callWebService);
+					
+					this.threadPool.execute(new JoinTasksFutureResults(futureDB, futureWS, output));
 					break;
 				}
 				case "shutdown": {
