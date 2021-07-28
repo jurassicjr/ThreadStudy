@@ -18,7 +18,7 @@ public class TasksServer {
 	public TasksServer() throws IOException {
 		System.out.println("---- Starting the server ----");
 		this.server = new ServerSocket(11011);
-		this.threadPool = Executors.newCachedThreadPool();
+		this.threadPool = Executors.newCachedThreadPool(new ThreadsFactory());
 		this.isRunning = new AtomicBoolean(true);
 	}
 
@@ -28,7 +28,7 @@ public class TasksServer {
 				socket = server.accept();
 				System.out.println("--- Accepting new client at port - " + socket.getPort());
 
-				TasksDistribution tasksDistribution = new TasksDistribution(socket, this);
+				TasksDistribution tasksDistribution = new TasksDistribution(threadPool, socket, this);
 				threadPool.execute(tasksDistribution);
 			} catch (SocketException e) {
 				System.out.println("socket exception, is running? " + this.isRunning);
